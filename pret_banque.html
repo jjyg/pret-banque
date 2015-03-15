@@ -1,0 +1,94 @@
+<html>
+  <head>
+    <title>&Eacute;ch&eacute;ancier, calcul d'int&eacute;r&ecirc;ts</title>
+    <!-- Yoann Guillot, 03/2015, WtfPLv2 -->
+
+    <script language="javascript">
+function compute() {
+	var cap  = parseFloat(document.getElementById("capital").value);
+	var taux = parseFloat(document.getElementById("taux").value);
+	var mens = parseFloat(document.getElementById("mensualite").value);
+	var total = 0;
+	var d_month = (new Date()).getMonth() + 1;
+	var d_year = (new Date()).getFullYear();
+
+	var pageurl = document.location.href;
+	if (pageurl.indexOf("?"))
+		pageurl = pageurl.substr(0, pageurl.indexOf("?"));
+	pageurl += "?capital=" + cap + "&taux=" + taux + "&mensualite=" + mens;
+
+	var out = "";
+	var i;
+
+	out += "      <table>\n"
+	out += "        <tr><th>Date</th><th>Reste</th><th>Interets</th></tr>\n";
+	for (i=0 ; i<12*30 && cap > 0 ; i+=1) {
+		var interet = (cap * taux / 100 / 12);
+		cap += interet;
+
+		if (cap < mens)
+			mens = cap;
+		cap -= mens;
+		total += mens;
+
+		var date = "";
+		if (d_month < 10)
+			date += "0";
+		date += d_month;
+		date += "/";
+		date += d_year;
+
+		out += "        <tr><td>" + date + "</td><td>" + cap.toFixed(2) + "</td><td>" + interet.toFixed(2) + "</td></tr>\n";
+
+		if (d_month == 12)
+			out += "<tr></tr>";
+
+		d_month += 1;
+		if (d_month > 12) {
+			d_month = 1;
+			d_year += 1;
+		}
+	}
+	out += "      </table>\n";
+
+	out += "      <p>Total pay&eacute; : " + total.toFixed(2) + "</p>\n";
+
+	out += "      <p><a href=\"" + pageurl + "\">permalink</a></p>\n";
+
+	document.getElementById("output").innerHTML = out;
+}
+
+function startup() {
+	// parse URL query string: simul.html?taux=12.05
+	var query = location.search.substr(1);
+	query.split("&").forEach(function(part) {
+		var item = part.split("=");
+		var k = item[0];
+		var v = parseFloat(decodeURIComponent(item[1])).toFixed(2);
+		if (k == "capital" || k == "taux" || k == "mensualite")
+			document.getElementById(k).value = v;
+	});
+
+	compute();
+
+}
+    </script>
+    <style type="text/css">
+table { border-width: 1px; border-color: black; border-style: solid }
+td,th { border-width: 1px; border-color: black; border-style: dotted; min-width: 10em;}
+td { text-align: right; background-color: #fff; }
+tr:nth-child(2n) td { background-color: #ccc; }
+    </style>
+  </head>
+
+  <body onload="startup()">
+    <form>
+      capital : <input type="text" id="capital" value="10000"/>
+      taux : <input type="text" id="taux" value="4.50"/>
+      mensualit&eacute; : <input type="text" id="mensualite" value="1000"/>
+      <input type="submit" onclick="compute(); return false;" value="calculer"/>
+    </form>
+    <div id="output">
+    </div>
+  </body>
+</html>
